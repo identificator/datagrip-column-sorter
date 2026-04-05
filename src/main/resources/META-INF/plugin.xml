@@ -1,0 +1,30 @@
+<idea-plugin>
+    <id>io.identificator.datagripcolumnsorter</id>
+    <name>DataGrip Column Sorter</name>
+    <vendor url="https://khudoev.dev">Alexander Khudoev</vendor>
+
+    <description><![CDATA[
+    Adds utilities for sorting query result columns in DataGrip.
+  ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="DataGrip Column Sorter" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <action
+                id="DataGripColumnSorter.SortColumnsAlphabeticallyAction"
+                class="io.identificator.datagripcolumnsorter.actions.SortColumnsAlphabeticallyAction"
+                text="Sort Columns A-Z"
+                description="Sort result columns alphabetically"/>
+
+        <action
+                id="DataGripColumnSorter.RestoreOriginalColumnOrderAction"
+                class="io.identificator.datagripcolumnsorter.actions.RestoreOriginalColumnOrderAction"
+                text="Restore Original Column Order"
+                description="Restore the original result column order"/>
+    </actions>
+</idea-plugin>
