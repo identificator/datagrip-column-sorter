@@ -81,4 +81,22 @@ object TableColumnReorderer {
 
         return if (fallbackIndex < columnModel.columnCount) fallbackIndex else -1
     }
+
+    fun isAlphabeticallySorted(table: JTable): Boolean {
+        val columnModel = table.columnModel
+        val headers = mutableListOf<String>()
+
+        var index = 0
+        while (index < columnModel.columnCount) {
+            headers += columnModel.getColumn(index).headerValue?.toString().orEmpty()
+            index += 1
+        }
+
+        val sortedHeaders = headers
+            .mapIndexed { originalIndex, header -> originalIndex to header }
+            .sortedWith(compareBy({ it.second.lowercase() }, { it.first }))
+            .map { it.second }
+
+        return headers == sortedHeaders
+    }
 }

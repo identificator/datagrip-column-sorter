@@ -1,11 +1,21 @@
 package io.identificator.datagripcolumnsorter.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import io.identificator.datagripcolumnsorter.storage.ColumnOrderStorage
 import io.identificator.datagripcolumnsorter.table.TableColumnReorderer
 
 class SortColumnsAlphabeticallyAction : AnAction() {
+    override fun getActionUpdateThread() = ActionUpdateThread.EDT
+
+    override fun update(e: AnActionEvent) {
+        val table = ActionUtils.getActiveTable(e)
+
+        e.presentation.isVisible = true
+        e.presentation.isEnabled = table != null && !TableColumnReorderer.isAlphabeticallySorted(table)
+    }
+
     override fun actionPerformed(e: AnActionEvent) {
         val table = ActionUtils.getActiveTable(e)
         if (table == null) {
@@ -13,7 +23,7 @@ class SortColumnsAlphabeticallyAction : AnAction() {
             return
         }
 
-        ColumnOrderStorage.saveOriginalOrderIfAbsent(table)
+        ColumnOrderStorage.saveOriginalOrderIfNeeded(table)
 
         val changed = TableColumnReorderer.sortAlphabetically(table)
         if (!changed) {
@@ -23,4 +33,8 @@ class SortColumnsAlphabeticallyAction : AnAction() {
 
         ActionUtils.notifyInfo(e, "Columns sorted alphabetically")
     }
+
+
+
+
 }

@@ -19,12 +19,16 @@
                 id="DataGripColumnSorter.SortColumnsAlphabeticallyAction"
                 class="io.identificator.datagripcolumnsorter.actions.SortColumnsAlphabeticallyAction"
                 text="Sort Columns A-Z"
-                description="Sort result columns alphabetically"/>
+                description="Sort result columns alphabetically">
+            <add-to-group group-id="Console.TableResult.Group" anchor="last"/>
+        </action>
 
         <action
                 id="DataGripColumnSorter.RestoreOriginalColumnOrderAction"
                 class="io.identificator.datagripcolumnsorter.actions.RestoreOriginalColumnOrderAction"
                 text="Restore Original Column Order"
-                description="Restore the original result column order"/>
+                description="Restore the original result column order">
+            <add-to-group group-id="Console.TableResult.Group" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>
