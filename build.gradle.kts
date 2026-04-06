@@ -5,7 +5,6 @@ plugins {
 }
 
 group = "io.identificator"
-version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -25,16 +24,4 @@ dependencies {
 
 kotlin {
     jvmToolchain(21)
-}
-
-intellijPlatform {
-    pluginConfiguration {
-        ideaVersion {
-            sinceBuild = "261"
-        }
-
-        changeNotes = """
-            Initial skeleton for DataGrip column sorter plugin.
-        """.trimIndent()
-    }
 }

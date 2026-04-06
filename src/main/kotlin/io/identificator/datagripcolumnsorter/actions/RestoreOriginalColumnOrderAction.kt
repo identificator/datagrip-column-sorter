@@ -3,6 +3,7 @@ package io.identificator.datagripcolumnsorter.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import io.identificator.datagripcolumnsorter.settings.ColumnSorterSettingsState
 import io.identificator.datagripcolumnsorter.storage.ColumnOrderStorage
 import io.identificator.datagripcolumnsorter.table.TableColumnReorderer
 
@@ -11,9 +12,11 @@ class RestoreOriginalColumnOrderAction : AnAction() {
 
     override fun update(e: AnActionEvent) {
         val table = ActionUtils.getActiveTable(e)
+        val settings = ColumnSorterSettingsState.getInstance().state
 
-        e.presentation.isVisible = true
-        e.presentation.isEnabled = table != null
+        e.presentation.isVisible = settings.showRestoreButton
+        e.presentation.isEnabled = settings.showRestoreButton
+                && table != null
                 && ColumnOrderStorage.hasSavedOrder(table)
                 && ColumnOrderStorage.matchesCurrentResultSet(table)
     }

@@ -71,7 +71,7 @@ object ActionUtils {
         val project = e.project ?: return
 
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("DataGrip Column Sorter")
+            .getNotificationGroup("Column Sorter")
             .createNotification(message, NotificationType.INFORMATION)
             .notify(project)
     }
@@ -80,7 +80,7 @@ object ActionUtils {
         val project = e.project ?: return
 
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("DataGrip Column Sorter")
+            .getNotificationGroup("Column Sorter")
             .createNotification(message, NotificationType.WARNING)
             .notify(project)
     }

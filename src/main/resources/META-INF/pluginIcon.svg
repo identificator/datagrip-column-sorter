@@ -1,12 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M32.0845 7.94025V4H24.0203V7.9896H16.029V4H7.91553V7.94025H4V36H16.0044V32.0045C16.0058 30.9457 16.4274 29.9308 17.1766 29.1826C17.9258 28.4345 18.9412 28.0143 20 28.0143C21.0588 28.0143 22.0743 28.4345 22.8234 29.1826C23.5726 29.9308 23.9942 30.9457 23.9956 32.0045V36H36V7.94025H32.0845Z"
-          fill="url(#paint0_linear)"/>
-    <defs>
-        <linearGradient id="paint0_linear" x1="2.94192" y1="4.89955" x2="37.7772" y2="39.7345"
-                        gradientUnits="userSpaceOnUse">
-            <stop offset="0.15937" stop-color="#3BEA62"/>
-            <stop offset="0.5404" stop-color="#3C99CC"/>
-            <stop offset="0.93739" stop-color="#6B57FF"/>
-        </linearGradient>
-    </defs>
+  <rect x="4" y="5" width="32" height="30" rx="4" fill="#F5F7FA" stroke="#5E6A7A" stroke-width="1.5"/>
+  <rect x="6.5" y="8" width="6" height="5" rx="1.2" fill="#4C9AFF"/>
+  <rect x="13.8" y="8" width="6" height="5" rx="1.2" fill="#36CFC9"/>
+  <rect x="21.1" y="8" width="6" height="5" rx="1.2" fill="#95DE64"/>
+  <rect x="28.4" y="8" width="5.1" height="5" rx="1.2" fill="#FFC53D"/>
+
+  <rect x="6.5" y="15.2" width="22.2" height="5.6" rx="1.4" fill="#E8EDF3" stroke="#C4CEDA" stroke-width="0.7"/>
+  <path d="M11.7 18H23.2" stroke="#2563EB" stroke-width="1.9" stroke-linecap="round"/>
+  <path d="M21.1 16.2L23.8 18L21.1 19.8" stroke="#2563EB" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="6.5" y="22.2" width="22.2" height="5.6" rx="1.4" fill="#E8EDF3" stroke="#C4CEDA" stroke-width="0.7"/>
+  <path d="M23.4 25H11.9" stroke="#16A34A" stroke-width="1.9" stroke-linecap="round"/>
+  <path d="M14.0 23.2L11.3 25L14.0 26.8" stroke="#16A34A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="30.4" y="15.2" width="3.1" height="12.6" rx="1.1" fill="#EEF2F7"/>
+  <rect x="30.9" y="15.8" width="2.1" height="5.2" rx="0.8" fill="#2563EB"/>
+  <rect x="30.9" y="22.0" width="2.1" height="5.2" rx="0.8" fill="#16A34A"/>
 </svg>

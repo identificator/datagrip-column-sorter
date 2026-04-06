@@ -1,34 +1,93 @@
 <idea-plugin>
     <id>io.identificator.datagripcolumnsorter</id>
-    <name>DataGrip Column Sorter</name>
-    <vendor url="https://khudoev.dev">Alexander Khudoev</vendor>
-
+    <name>Column Sorter</name>
+    <vendor url="https://khudoev.dev" email="alexanderkhudoev@gmail.com">Alexander Khudoev</vendor>
+    <resource-bundle>messages.ColumnSorterBundle</resource-bundle>
     <description><![CDATA[
-    Adds utilities for sorting query result columns in DataGrip.
-  ]]></description>
+Sort and restore query result columns in DataGrip.
+
+<h2>Overview</h2>
+<p>
+Column Sorter adds convenient actions for reordering columns directly in the Result Grid toolbar.
+</p>
+
+<h2>Key Features</h2>
+<ul>
+  <li>Sort columns alphabetically (A-Z)</li>
+  <li>Restore the original column order</li>
+  <li>Keep pinned columns grouped first</li>
+  <li>Correctly handle multiple queries executed from the same console</li>
+  <li>Use toolbar actions or invoke commands via Find Action</li>
+</ul>
+
+<h2>Getting Started</h2>
+<ol>
+  <li>Run a query in DataGrip.</li>
+  <li>Open the tabular Result Grid.</li>
+  <li>Use <b>Sort Columns A-Z</b> to sort visible columns.</li>
+  <li>Use <b>Restore Original Column Order</b> to return to the initial order.</li>
+</ol>
+
+<h2>Settings</h2>
+<p>
+Open <b>File | Settings | Column Sorter</b>
+</p>
+<ul>
+  <li>Show or hide toolbar buttons</li>
+  <li>Configure pinned column names</li>
+  <li>Enable pinned columns to stay first during sorting</li>
+</ul>
+
+<h2>Notes</h2>
+<p>
+The plugin changes only the visual order of columns in the Result Grid.
+It does not modify SQL queries, database schema, or stored table structure.
+</p>
+]]></description>
+
+    <version>0.1.0</version>
+    <idea-version since-build="261"/>
+
+    <change-notes><![CDATA[
+  <p><b>0.1.0</b></p>
+  <ul>
+    <li>Added alphabetical sorting for result grid columns</li>
+    <li>Added restore of the original column order</li>
+    <li>Added support for pinned columns</li>
+    <li>Added handling for multiple queries executed from the same console</li>
+    <li>Added plugin settings and toolbar integration</li>
+  </ul>
+]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.database</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <notificationGroup id="DataGrip Column Sorter" displayType="BALLOON"/>
+        <notificationGroup id="Column Sorter" displayType="BALLOON"/>
+        <applicationConfigurable
+                id="io.identificator.datagripcolumnsorter.settings"
+                key="settings.displayName"
+                bundle="messages.ColumnSorterBundle"
+                instance="io.identificator.datagripcolumnsorter.settings.ColumnSorterSettingsConfigurable"/>
     </extensions>
 
     <actions>
-        <action
-                id="DataGripColumnSorter.SortColumnsAlphabeticallyAction"
-                class="io.identificator.datagripcolumnsorter.actions.SortColumnsAlphabeticallyAction"
-                text="Sort Columns A-Z"
-                description="Sort result columns alphabetically">
+        <group
+                id="DataGripColumnSorter.ResultGridGroup"
+                popup="false">
             <add-to-group group-id="Console.TableResult.Group" anchor="last"/>
-        </action>
 
-        <action
-                id="DataGripColumnSorter.RestoreOriginalColumnOrderAction"
-                class="io.identificator.datagripcolumnsorter.actions.RestoreOriginalColumnOrderAction"
-                text="Restore Original Column Order"
-                description="Restore the original result column order">
-            <add-to-group group-id="Console.TableResult.Group" anchor="last"/>
-        </action>
+            <separator/>
+
+            <action
+                    id="DataGripColumnSorter.SortColumnsAlphabeticallyAction"
+                    class="io.identificator.datagripcolumnsorter.actions.SortColumnsAlphabeticallyAction"
+                    icon="AllIcons.ObjectBrowser.Sorted"/>
+
+            <action
+                    id="DataGripColumnSorter.RestoreOriginalColumnOrderAction"
+                    class="io.identificator.datagripcolumnsorter.actions.RestoreOriginalColumnOrderAction"
+                    icon="AllIcons.Actions.Rollback"/>
+        </group>
     </actions>
 </idea-plugin>

@@ -3,6 +3,7 @@ package io.identificator.datagripcolumnsorter.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import io.identificator.datagripcolumnsorter.settings.ColumnSorterSettingsState
 import io.identificator.datagripcolumnsorter.storage.ColumnOrderStorage
 import io.identificator.datagripcolumnsorter.table.TableColumnReorderer
 
@@ -11,9 +12,12 @@ class SortColumnsAlphabeticallyAction : AnAction() {
 
     override fun update(e: AnActionEvent) {
         val table = ActionUtils.getActiveTable(e)
+        val settings = ColumnSorterSettingsState.getInstance().state
 
-        e.presentation.isVisible = true
-        e.presentation.isEnabled = table != null && !TableColumnReorderer.isAlphabeticallySorted(table)
+        e.presentation.isVisible = settings.showSortButton
+        e.presentation.isEnabled = settings.showSortButton
+                && table != null
+                && !TableColumnReorderer.isAlphabeticallySorted(table)
     }
 
     override fun actionPerformed(e: AnActionEvent) {

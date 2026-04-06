@@ -1,7 +1,11 @@
 package io.identificator.datagripcolumnsorter.table
 
+import io.identificator.datagripcolumnsorter.settings.ColumnSorterSettingsState
+import java.awt.Rectangle
 import java.util.Locale
 import javax.swing.JTable
+import javax.swing.JViewport
+import javax.swing.SwingUtilities
 
 object TableColumnReorderer {
     fun sortAlphabetically(table: JTable): Boolean {
@@ -21,11 +25,15 @@ object TableColumnReorderer {
             index += 1
         }
 
-        val sortedHeaders = headersWithIndex
-            .sortedWith(compareBy({ it.second.lowercase(Locale.getDefault()) }, { it.first }))
-            .map { it.second }
+        val settings = ColumnSorterSettingsState.getInstance().state
+        val targetHeaders = buildTargetOrder(headersWithIndex, settings)
+        val changed = applyHeaderOrder(table, targetHeaders)
 
-        return applyHeaderOrder(table, sortedHeaders)
+        if (changed) {
+            resetSelectionAndScroll(table)
+        }
+
+        return changed
     }
 
     fun restoreOriginalOrder(table: JTable, originalHeaders: List<String>): Boolean {
@@ -33,7 +41,64 @@ object TableColumnReorderer {
             return false
         }
 
-        return applyHeaderOrder(table, originalHeaders)
+        val changed = applyHeaderOrder(table, originalHeaders)
+        if (changed) {
+            resetSelectionAndScroll(table)
+        }
+
+        return changed
+    }
+
+    fun isAlphabeticallySorted(table: JTable): Boolean {
+        val columnModel = table.columnModel
+        val count = columnModel.columnCount
+        val headersWithIndex = mutableListOf<Pair<Int, String>>()
+
+        var index = 0
+        while (index < count) {
+            val header = columnModel.getColumn(index).headerValue?.toString().orEmpty()
+            headersWithIndex += index to header
+            index += 1
+        }
+
+        val settings = ColumnSorterSettingsState.getInstance().state
+        val targetHeaders = buildTargetOrder(headersWithIndex, settings)
+        val currentHeaders = headersWithIndex.map { it.second }
+
+        return currentHeaders == targetHeaders
+    }
+
+    private fun buildTargetOrder(
+        headersWithIndex: List<Pair<Int, String>>,
+        settings: ColumnSorterSettingsState.State
+    ): List<String> {
+        if (!settings.enablePinnedColumnsFirst) {
+            return headersWithIndex
+                .sortedWith(compareBy({ it.second.lowercase(Locale.getDefault()) }, { it.first }))
+                .map { it.second }
+        }
+
+        val pinnedNames = settings.pinnedColumnNames
+            .map { it.trim().lowercase(Locale.getDefault()) }
+            .filter { it.isNotEmpty() }
+            .toSet()
+
+        val pinned = mutableListOf<Pair<Int, String>>()
+        val regular = mutableListOf<Pair<Int, String>>()
+
+        headersWithIndex.forEach { pair ->
+            val headerLower = pair.second.trim().lowercase(Locale.getDefault())
+            if (headerLower in pinnedNames) {
+                pinned += pair
+            } else {
+                regular += pair
+            }
+        }
+
+        val sortedRegular = regular
+            .sortedWith(compareBy({ it.second.lowercase(Locale.getDefault()) }, { it.first }))
+
+        return (pinned + sortedRegular).map { it.second }
     }
 
     private fun applyHeaderOrder(table: JTable, headers: List<String>): Boolean {
@@ -44,6 +109,7 @@ object TableColumnReorderer {
             return false
         }
 
+        var anyMoved = false
         var targetIndex = 0
         while (targetIndex < headers.size) {
             val expectedHeader = headers[targetIndex]
@@ -55,12 +121,13 @@ object TableColumnReorderer {
 
             if (currentIndex != targetIndex) {
                 columnModel.moveColumn(currentIndex, targetIndex)
+                anyMoved = true
             }
 
             targetIndex += 1
         }
 
-        return true
+        return anyMoved
     }
 
     private fun findColumnIndexByHeader(
@@ -82,21 +149,41 @@ object TableColumnReorderer {
         return if (fallbackIndex < columnModel.columnCount) fallbackIndex else -1
     }
 
-    fun isAlphabeticallySorted(table: JTable): Boolean {
-        val columnModel = table.columnModel
-        val headers = mutableListOf<String>()
+    private fun resetSelectionAndScroll(table: JTable) {
+        table.clearSelection()
+        table.selectionModel.clearSelection()
+        table.columnModel.selectionModel.clearSelection()
 
-        var index = 0
-        while (index < columnModel.columnCount) {
-            headers += columnModel.getColumn(index).headerValue?.toString().orEmpty()
-            index += 1
+        val rowCount = table.rowCount
+        val columnCount = table.columnCount
+
+        if (rowCount > 0 && columnCount > 0) {
+            table.setRowSelectionAllowed(false)
+            table.setColumnSelectionAllowed(false)
+            table.changeSelection(0, 0, false, false)
+            table.clearSelection()
+            table.setRowSelectionAllowed(true)
+            table.setColumnSelectionAllowed(true)
         }
 
-        val sortedHeaders = headers
-            .mapIndexed { originalIndex, header -> originalIndex to header }
-            .sortedWith(compareBy({ it.second.lowercase() }, { it.first }))
-            .map { it.second }
+        SwingUtilities.invokeLater {
+            table.tableHeader?.repaint()
+            table.repaint()
 
-        return headers == sortedHeaders
+            val firstColumnRect = try {
+                table.getCellRect(0, 0, true)
+            } catch (_: Exception) {
+                Rectangle(0, 0, 1, 1)
+            }
+
+            table.scrollRectToVisible(Rectangle(firstColumnRect.x, 0, 1, 1))
+
+            val viewport = SwingUtilities.getAncestorOfClass(JViewport::class.java, table) as? JViewport
+            if (viewport != null) {
+                val point = viewport.viewPosition
+                point.x = 0
+                viewport.viewPosition = point
+            }
+        }
     }
 }
