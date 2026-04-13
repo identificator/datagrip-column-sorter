@@ -4,11 +4,9 @@
     <vendor url="https://khudoev.dev" email="alexanderkhudoev@gmail.com">Alexander Khudoev</vendor>
     <resource-bundle>messages.ColumnSorterBundle</resource-bundle>
     <description><![CDATA[
-Sort and restore query result columns in DataGrip.
-
 <h2>Overview</h2>
 <p>
-Column Sorter adds convenient actions for reordering columns directly in the Result Grid toolbar.
+Column Sorter adds convenient actions to sort and restore query result columns across supported DataGrip Result views.
 </p>
 
 <h2>Key Features</h2>
@@ -16,16 +14,26 @@ Column Sorter adds convenient actions for reordering columns directly in the Res
   <li>Sort columns alphabetically (A-Z)</li>
   <li>Restore the original column order</li>
   <li>Keep pinned columns grouped first</li>
+  <li>Supports additional Result views:
+    <ul>
+      <li>Services Result Grid</li>
+      <li>in-editor results</li>
+      <li>table view opened in a separate tab</li>
+    </ul>
+  </li>
+  <li>Supports transposed result views</li>
+  <li>Adds actions to the column header context menu in regular table view</li>
   <li>Correctly handle multiple queries executed from the same console</li>
   <li>Use toolbar actions or invoke commands via Find Action</li>
 </ul>
 
 <h2>Getting Started</h2>
 <ol>
-  <li>Run a query in DataGrip.</li>
-  <li>Open the tabular Result Grid.</li>
-  <li>Use <b>Sort Columns A-Z</b> to sort visible columns.</li>
+  <li>Run a query.</li>
+  <li>Open any supported result view.</li>
+  <li>Use <b>Sort Columns A-Z</b> from the toolbar or column header context menu.</li>
   <li>Use <b>Restore Original Column Order</b> to return to the initial order.</li>
+  <li>To keep specific columns first, open <b>File | Settings | Column Sorter</b> and configure pinned column names.</li>
 </ol>
 
 <h2>Settings</h2>
@@ -45,10 +53,23 @@ It does not modify SQL queries, database schema, or stored table structure.
 </p>
 ]]></description>
 
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <idea-version since-build="261"/>
 
     <change-notes><![CDATA[
+     <p><b>1.0.0</b> - 2026-04-13</p>
+  <p><b>Added</b></p>
+  <ul>
+    <li>Added support for sorting columns in additional Result views:
+      <ul>
+        <li>Services Result Grid</li>
+        <li>in-editor results</li>
+        <li>table view opened in a separate tab</li>
+      </ul>
+    </li>
+    <li>Added plugin actions to the column header context menu in regular table view</li>
+    <li>Added support for transposed result views</li>
+  </ul>
   <p><b>0.1.0</b></p>
   <ul>
     <li>Added alphabetical sorting for result grid columns</li>
@@ -72,22 +93,41 @@ It does not modify SQL queries, database schema, or stored table structure.
     </extensions>
 
     <actions>
+        <action
+                id="DataGripColumnSorter.SortColumnsAlphabeticallyAction"
+                class="io.identificator.datagripcolumnsorter.actions.SortColumnsAlphabeticallyAction"
+                icon="AllIcons.ObjectBrowser.Sorted"/>
+
+        <action
+                id="DataGripColumnSorter.RestoreOriginalColumnOrderAction"
+                class="io.identificator.datagripcolumnsorter.actions.RestoreOriginalColumnOrderAction"
+                icon="AllIcons.Actions.Rollback"/>
+
         <group
                 id="DataGripColumnSorter.ResultGridGroup"
                 popup="false">
             <add-to-group group-id="Console.TableResult.Group" anchor="last"/>
+            <add-to-group group-id="Console.EditorTableResult.Group" anchor="last"/>
+            <add-to-group group-id="Console.InEditorTableResult.Vertical.Group" anchor="first"/>
 
             <separator/>
 
-            <action
-                    id="DataGripColumnSorter.SortColumnsAlphabeticallyAction"
-                    class="io.identificator.datagripcolumnsorter.actions.SortColumnsAlphabeticallyAction"
-                    icon="AllIcons.ObjectBrowser.Sorted"/>
+            <reference ref="DataGripColumnSorter.SortColumnsAlphabeticallyAction"/>
+            <reference ref="DataGripColumnSorter.RestoreOriginalColumnOrderAction"/>
+        </group>
 
-            <action
-                    id="DataGripColumnSorter.RestoreOriginalColumnOrderAction"
-                    class="io.identificator.datagripcolumnsorter.actions.RestoreOriginalColumnOrderAction"
-                    icon="AllIcons.Actions.Rollback"/>
+        <group
+                id="DataGripColumnSorter.HeaderPopupGroup"
+                popup="false">
+            <add-to-group
+                    group-id="Console.TableResult.ColumnHeaderPopup"
+                    anchor="after"
+                    relative-to-action="TableResult.SelectColumn"/>
+
+            <separator text="COLUMN SORTER"/>
+            <reference ref="DataGripColumnSorter.SortColumnsAlphabeticallyAction"/>
+            <reference ref="DataGripColumnSorter.RestoreOriginalColumnOrderAction"/>
+            <separator/>
         </group>
     </actions>
 </idea-plugin>
