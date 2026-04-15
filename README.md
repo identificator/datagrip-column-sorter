@@ -2,6 +2,10 @@
 
 A lightweight DataGrip plugin that adds convenient column reordering actions directly to the query Result Grid toolbar.
 
+Compatible with IntelliJ IDEA, CLion, DataGrip, DataSpell, GoLand, PhpStorm, PyCharm Pro, Rider, RubyMine, RustRover, WebStorm.
+
+![Column-Sorter-with-logos.png](docs/images/Column-Sorter-with-logos.png)
+
 ## Features
 
 - Sort result columns alphabetically (A-Z)
