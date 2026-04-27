@@ -1,5 +1,9 @@
 package io.identificator.datagripcolumnsorter.table
 
+import com.intellij.database.datagrid.DataGrid
+import com.intellij.database.datagrid.GridColumn
+import com.intellij.database.datagrid.ModelIndex
+import com.intellij.database.run.ui.DataAccessType
 import java.awt.Component
 import java.awt.Container
 import java.lang.reflect.Method
@@ -10,6 +14,13 @@ import javax.swing.JTable
 import javax.swing.JViewport
 
 object TransposedRowHeaderReflectionUtils {
+    data class TransposedFieldDescriptor(
+        val rowIndex: Int,
+        val header: String,
+        val jdbcType: Int?,
+        val typeName: String?
+    )
+
     private const val TABLE_RESULT_ROW_HEADER_CLASS =
         "com.intellij.database.run.ui.table.TableResultRowHeader"
 
@@ -46,6 +57,85 @@ object TransposedRowHeaderReflectionUtils {
         }
 
         return headers
+    }
+
+    fun readVisibleFieldDescriptors(table: JTable?): List<TransposedFieldDescriptor> {
+        if (table == null) {
+            return emptyList()
+        }
+
+        val headers = readVisibleFieldHeaders(table)
+        if (headers.isEmpty()) {
+            return emptyList()
+        }
+
+        val rowHeader = findRowHeader(table) ?: return emptyList()
+
+        val resultPanel = readFieldValue(rowHeader, "myResultPanel") as? DataGrid ?: return emptyList()
+        val resultTable = readFieldValue(rowHeader, "myTable") as? JTable ?: return emptyList()
+
+        val dataModel = resultPanel.getDataModel(DataAccessType.DATA_WITH_MUTATIONS)
+
+        val descriptors = mutableListOf<TransposedFieldDescriptor>()
+
+        var rowIndex = 0
+        while (rowIndex < headers.size) {
+            val header = headers[rowIndex]
+            val modelRowIndex = safeCall {
+                resultTable.convertRowIndexToModel(rowIndex)
+            }
+
+            var jdbcType: Int? = null
+            var typeName: String? = null
+
+            if (modelRowIndex != null && modelRowIndex >= 0) {
+                val modelColumnIdx = ModelIndex.forColumn(resultPanel, modelRowIndex)
+                val gridColumn = safeCall {
+                    dataModel.getColumn(modelColumnIdx)
+                } as? GridColumn
+
+                if (gridColumn != null) {
+                    jdbcType = safeCall { gridColumn.type }
+                    typeName = safeCall { gridColumn.typeName }
+                }
+            }
+
+            descriptors += TransposedFieldDescriptor(
+                rowIndex = rowIndex,
+                header = header,
+                jdbcType = jdbcType,
+                typeName = typeName
+            )
+
+            rowIndex += 1
+        }
+
+        return descriptors
+    }
+
+    fun dumpVisibleFieldDescriptors(table: JTable?) {
+        println("=== TRANSPOSE FIELD DESCRIPTORS START ===")
+
+        val descriptors = readVisibleFieldDescriptors(table)
+        if (descriptors.isEmpty()) {
+            println("No descriptors found")
+            println("=== TRANSPOSE FIELD DESCRIPTORS END ===")
+            return
+        }
+
+        var index = 0
+        while (index < descriptors.size) {
+            val descriptor = descriptors[index]
+            println(
+                "rowIndex=${descriptor.rowIndex}, " +
+                        "header='${descriptor.header}', " +
+                        "jdbcType=${descriptor.jdbcType}, " +
+                        "typeName='${descriptor.typeName}'"
+            )
+            index += 1
+        }
+
+        println("=== TRANSPOSE FIELD DESCRIPTORS END ===")
     }
 
     private fun findRowHeader(table: JTable): JComponent? {
@@ -158,6 +248,29 @@ object TransposedRowHeaderReflectionUtils {
         }
 
         return true
+    }
+
+    private fun readFieldValue(obj: Any?, fieldName: String): Any? {
+        if (obj == null) {
+            return null
+        }
+
+        var current: Class<*>? = obj.javaClass
+        while (current != null) {
+            val fields = current.declaredFields
+            var index = 0
+            while (index < fields.size) {
+                val field = fields[index]
+                if (field.name == fieldName) {
+                    field.isAccessible = true
+                    return safeCall { field.get(obj) }
+                }
+                index += 1
+            }
+            current = current.superclass
+        }
+
+        return null
     }
 
     private fun <T> safeCall(block: () -> T): T? {

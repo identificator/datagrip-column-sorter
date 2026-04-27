@@ -8,6 +8,13 @@ import javax.swing.RowSorter
 import javax.swing.table.TableModel
 
 object TransposedTableReorderer {
+    private data class RowDescriptor(
+        val rowIndex: Int,
+        val header: String,
+        val jdbcType: Int?,
+        val typeName: String?
+    )
+
     fun readCurrentOrder(table: JTable): List<String> {
         clearInvalidSorterIfNeeded(table)
         return TransposedRowHeaderReflectionUtils.readVisibleFieldHeaders(table)
@@ -16,62 +23,29 @@ object TransposedTableReorderer {
     fun isAlphabeticallySorted(table: JTable): Boolean {
         clearInvalidSorterIfNeeded(table)
 
-        val currentHeaders = readCurrentOrder(table)
-        if (currentHeaders.size < 2) {
+        val descriptors = readRowDescriptors(table)
+        if (descriptors.size < 2) {
             return true
         }
 
         val settings = ColumnSorterSettingsState.getInstance().state
-        val targetHeaders = buildTargetOrder(currentHeaders, settings)
+        val targetHeaders = buildTargetOrder(descriptors, settings)
+        val currentHeaders = descriptors.map { it.header }
 
         return currentHeaders == targetHeaders
-    }
-
-    fun buildTargetOrder(
-        headers: List<String>,
-        settings: ColumnSorterSettingsState.State
-    ): List<String> {
-        val headersWithIndex = headers.mapIndexed { index, header -> index to header }
-
-        if (!settings.enablePinnedColumnsFirst) {
-            return headersWithIndex
-                .sortedWith(compareBy({ it.second.lowercase(Locale.getDefault()) }, { it.first }))
-                .map { it.second }
-        }
-
-        val pinnedNames = settings.pinnedColumnNames
-            .map { it.trim().lowercase(Locale.getDefault()) }
-            .filter { it.isNotEmpty() }
-            .toSet()
-
-        val pinned = mutableListOf<Pair<Int, String>>()
-        val regular = mutableListOf<Pair<Int, String>>()
-
-        headersWithIndex.forEach { pair ->
-            val headerLower = pair.second.trim().lowercase(Locale.getDefault())
-            if (headerLower in pinnedNames) {
-                pinned += pair
-            } else {
-                regular += pair
-            }
-        }
-
-        val sortedRegular = regular
-            .sortedWith(compareBy({ it.second.lowercase(Locale.getDefault()) }, { it.first }))
-
-        return (pinned + sortedRegular).map { it.second }
     }
 
     fun sortAlphabetically(table: JTable): Boolean {
         clearInvalidSorterIfNeeded(table)
 
-        val currentHeaders = readCurrentOrder(table)
-        if (currentHeaders.size < 2) {
+        val descriptors = readRowDescriptors(table)
+        if (descriptors.size < 2) {
             return false
         }
 
         val settings = ColumnSorterSettingsState.getInstance().state
-        val targetHeaders = buildTargetOrder(currentHeaders, settings)
+        val currentHeaders = descriptors.map { it.header }
+        val targetHeaders = buildTargetOrder(descriptors, settings)
 
         if (currentHeaders == targetHeaders) {
             return false
@@ -93,6 +67,97 @@ object TransposedTableReorderer {
         }
 
         return applyRowOrder(table, currentHeaders, originalHeaders)
+    }
+
+    private fun readRowDescriptors(table: JTable): List<RowDescriptor> {
+        val descriptors = TransposedRowHeaderReflectionUtils.readVisibleFieldDescriptors(table)
+        if (descriptors.isNotEmpty()) {
+            return descriptors.map { descriptor ->
+                RowDescriptor(
+                    rowIndex = descriptor.rowIndex,
+                    header = descriptor.header,
+                    jdbcType = descriptor.jdbcType,
+                    typeName = descriptor.typeName
+                )
+            }
+        }
+
+        return readCurrentOrder(table).mapIndexed { index, header ->
+            RowDescriptor(
+                rowIndex = index,
+                header = header,
+                jdbcType = null,
+                typeName = null
+            )
+        }
+    }
+
+    private fun buildTargetOrder(
+        descriptors: List<RowDescriptor>,
+        settings: ColumnSorterSettingsState.State
+    ): List<String> {
+        val sorted = descriptors.sortedWith(
+            compareBy<RowDescriptor>(
+                { pinnedRank(it, settings) },
+                { typeRank(it, settings) },
+                { it.header.lowercase(Locale.getDefault()) },
+                { it.rowIndex }
+            )
+        )
+
+        return sorted.map { it.header }
+    }
+
+    private fun pinnedRank(
+        descriptor: RowDescriptor,
+        settings: ColumnSorterSettingsState.State
+    ): Int {
+        if (!settings.enablePinnedColumnsFirst) {
+            return 1
+        }
+
+        val pinnedNames = settings.pinnedColumnNames
+            .map { it.trim().lowercase(Locale.getDefault()) }
+            .filter { it.isNotEmpty() }
+            .toSet()
+
+        val headerLower = descriptor.header.trim().lowercase(Locale.getDefault())
+        return if (headerLower in pinnedNames) 0 else 1
+    }
+
+    private fun typeRank(
+        descriptor: RowDescriptor,
+        settings: ColumnSorterSettingsState.State
+    ): Int {
+        if (!settings.enableSortByTypeFirst) {
+            return 0
+        }
+
+        val jdbcType = descriptor.jdbcType ?: return Int.MAX_VALUE
+        val typeName = descriptor.typeName?.trim()?.lowercase(Locale.getDefault()).orEmpty()
+        val rules = settings.typeSortRules
+
+        var index = 0
+        while (index < rules.size) {
+            val rule = rules[index]
+            if (rule.jdbcType == jdbcType &&
+                rule.typeName.trim().lowercase(Locale.getDefault()) == typeName
+            ) {
+                return index
+            }
+            index += 1
+        }
+
+        index = 0
+        while (index < rules.size) {
+            val rule = rules[index]
+            if (rule.jdbcType == jdbcType) {
+                return index
+            }
+            index += 1
+        }
+
+        return Int.MAX_VALUE
     }
 
     /**

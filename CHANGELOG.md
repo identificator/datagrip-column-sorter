@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 - 2026-04-26
+
+### Added
+- Added optional mode for sorting by data type first and then alphabetically for each data type group
+- Added configurable type priority rules in plugin settings
+
+### Changed
+- Improved transpose metadata handling to read field types directly from result grid data
+- Kept transposed sorting and restore behavior stable when type-based sorting is enabled
+
+### Notes
+- Type-based sorting is currently intended for PostgreSQL-based result metadata
+- Type-aware ordering works in both regular and transposed result views
+
 ## 1.0.0 - 2026-04-13
 
 ### Added

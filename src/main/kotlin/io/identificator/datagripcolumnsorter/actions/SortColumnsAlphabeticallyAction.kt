@@ -3,11 +3,14 @@ package io.identificator.datagripcolumnsorter.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import io.identificator.datagripcolumnsorter.debug.GridColumnDebugUtils
+import io.identificator.datagripcolumnsorter.debug.TableReflectionDebugUtils
 import io.identificator.datagripcolumnsorter.settings.ColumnSorterSettingsState
 import io.identificator.datagripcolumnsorter.storage.ColumnOrderStorage
 import io.identificator.datagripcolumnsorter.storage.TransposedColumnOrderStorage
 import io.identificator.datagripcolumnsorter.table.TableColumnReorderer
 import io.identificator.datagripcolumnsorter.table.TableViewModeDetector
+import io.identificator.datagripcolumnsorter.table.TransposedRowHeaderReflectionUtils
 import io.identificator.datagripcolumnsorter.table.TransposedTableReorderer
 
 class SortColumnsAlphabeticallyAction : AnAction() {

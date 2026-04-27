@@ -12,6 +12,7 @@ Column Sorter adds convenient actions to sort and restore query result columns a
 <h2>Key Features</h2>
 <ul>
   <li>Sort columns alphabetically (A-Z)</li>
+  <li>Sort columns by data type first, then A-Z within each data type group</li>
   <li>Restore the original column order</li>
   <li>Keep pinned columns grouped first</li>
   <li>Supports additional Result views:
@@ -33,7 +34,7 @@ Column Sorter adds convenient actions to sort and restore query result columns a
   <li>Open any supported result view.</li>
   <li>Use <b>Sort Columns A-Z</b> from the toolbar or column header context menu.</li>
   <li>Use <b>Restore Original Column Order</b> to return to the initial order.</li>
-  <li>To keep specific columns first, open <b>File | Settings | Column Sorter</b> and configure pinned column names.</li>
+  <li>To keep specific columns first or data type sorting mode, open <b>File | Settings | Column Sorter</b> and configure pinned column names.</li>
 </ol>
 
 <h2>Settings</h2>
@@ -53,11 +54,22 @@ It does not modify SQL queries, database schema, or stored table structure.
 </p>
 ]]></description>
 
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <idea-version since-build="261"/>
 
     <change-notes><![CDATA[
-     <p><b>1.0.0</b> - 2026-04-13</p>
+    <p><b>1.1.0</b> - 2026-04-26</p>
+  <p><b>Added</b></p>
+  <ul>
+    <li>Added optional sorting by data type first and then alphabetically in each data type group</li>
+    <li>Added configurable data type priority rules in plugin settings</li>
+  </ul>
+  <p><b>Changed</b></p>
+  <ul>
+    <li>Improved transpose metadata handling to read field types from result grid data instead of tooltip parsing</li>
+    <li>Updated documentation and settings guidance for the new type-based sorting workflow</li>
+  </ul>
+  <p><b>1.0.0</b> - 2026-04-13</p>
   <p><b>Added</b></p>
   <ul>
     <li>Added support for sorting columns in additional Result views:

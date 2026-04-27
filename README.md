@@ -9,6 +9,7 @@ Compatible with IntelliJ IDEA, CLion, DataGrip, DataSpell, GoLand, PhpStorm, PyC
 ## Features
 
 - Sort result columns alphabetically (A-Z)
+- Optional mode: sort columns by data type first, then A-Z within each data type group
 - Restore the original column order
 - Keep pinned columns grouped first
 - Works with multiple queries executed from the same console
@@ -137,6 +138,52 @@ This is useful for:
 - reading long column lists more comfortably
 - grouping fields alphabetically while preserving row-to-data alignment
 
+## Sorting by data type
+
+The plugin can optionally sort fields by **data type first** and then **alphabetically inside each type group**.
+
+Typical example in a PostgreSQL result:
+- boolean fields can be grouped together
+- integer fields can be grouped together
+- numeric fields can be grouped together
+- varchar and text fields can be grouped together
+- timestamp fields can be grouped together
+- json/jsonb fields can be grouped together
+- etc.
+
+This is useful when you work with wide tables and want related fields to stay visually grouped.
+
+### Data Type Rules format
+
+**Type priority order**  
+
+A list of type rules in the format `jdbcType|typeName`.
+
+The plugin processes the list from top to bottom, so higher rules get higher priority during type-based sorting.
+You can reorder the rules in Settings to change how type groups are arranged in the result grid.
+
+Example:
+  - `-7|bool`
+  - `4|int4`
+  - `12|varchar`
+  - `2|numeric`
+  - `93|timestamp`
+
+  The plugin uses this order when **Sort by data type first** is enabled.
+
+### How to enable it
+
+1. Open **Settings | Column Sorter**.
+2. Enable the option for **sorting by data type first**.
+3. Adjust the **type priority order** in settings.
+4. Run a query and click **Sort Columns A-Z**.
+
+When the option is enabled, the same sort action works like this:
+
+1. Pinned columns are placed first, if that option is enabled
+2. The remaining fields are grouped by type according to the configured priority
+3. Fields inside the same type group are sorted alphabetically
+
 ## Screenshots
 
 #### Before sorting columns
@@ -176,6 +223,18 @@ This is useful for:
 #### Transposed result view
 
 ![Transposed view after sort](docs/images/transposed_sort_view.jpg)
+
+### Sorting by data type Settings
+
+![Data type sorting mode settings](docs/images/data_type_sorting_settings.jpg)
+
+### Sorting by data type - Regular result view
+
+![Data type sorting mode settings](docs/images/DataType-Sorting.jpg)
+
+### Sorting by data type - Transposed result view
+
+![Data type sorting mode settings](docs/images/DataType-Transposed-Sorting.jpg)
 
 ## Actions
 
